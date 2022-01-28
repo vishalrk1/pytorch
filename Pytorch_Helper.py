@@ -1,14 +1,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
+
 import itertools
-import torch
-import numpy as np
 import json
 from collections import Counter
 from more_itertools import take
-import torch
 from tqdm.notebook import tqdm
 from sklearn.metrics import confusion_matrix
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
 # function to calculate accuracy using model and Dataset loaders
 def calculate_acc(model, loader):
