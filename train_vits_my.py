@@ -2,14 +2,15 @@ import os
 
 from trainer import Trainer, TrainerArgs
 
+from TTS.config.shared_configs import BaseAudioConfig
 from TTS.tts.configs.shared_configs import BaseDatasetConfig
 from TTS.tts.configs.vits_config import VitsConfig
 from TTS.tts.datasets import load_tts_samples
-from TTS.tts.models.vits import Vits, VitsAudioConfig
+from TTS.tts.models.vits import Vits
 from TTS.tts.utils.text.tokenizer import TTSTokenizer
 from TTS.utils.audio import AudioProcessor
 
-# formatter for our dataset
+# our custome formatter
 def myvoice(root_path, meta_file, **kwargs):  # pylint: disable=unused-argument
     """Normalizes the LJSpeech meta data file to TTS format
     https://keithito.com/LJ-Speech-Dataset/"""
@@ -29,23 +30,36 @@ def myvoice(root_path, meta_file, **kwargs):  # pylint: disable=unused-argument
 
 output_path = os.path.dirname(os.path.abspath(__file__))
 dataset_config = BaseDatasetConfig(
-    name="hdfc-2", meta_file_train="metadata.csv", path='./Dataset'
+    name="myvoice", meta_file_train="metadata.csv", path='./Dataset'
 )
-audio_config = VitsAudioConfig(
-    sample_rate=22050, win_length=1024, hop_length=256, num_mels=80, mel_fmin=0, mel_fmax=None
+audio_config = BaseAudioConfig(
+    sample_rate=22050,
+    win_length=1024,
+    hop_length=256,
+    num_mels=80,
+    preemphasis=0.0,
+    ref_level_db=20,
+    log_func="np.log",
+    do_trim_silence=True,
+    trim_db=45,
+    mel_fmin=0,
+    mel_fmax=None,
+    spec_gain=1.0,
+    signal_norm=False,
+    do_amp_to_db_linear=False,
 )
 
 config = VitsConfig(
     audio=audio_config,
-    run_name="vits_ljspeech",
+    run_name="hdfc-1",
     batch_size=32,
     eval_batch_size=16,
     batch_group_size=5,
-    num_loader_workers=8,
+    num_loader_workers=0,
     num_eval_loader_workers=4,
     run_eval=True,
     test_delay_epochs=-1,
-    epochs=1000,
+    epochs=500,
     text_cleaner="english_cleaners",
     use_phonemes=True,
     phoneme_language="en-us",
@@ -54,9 +68,8 @@ config = VitsConfig(
     print_step=25,
     print_eval=True,
     mixed_precision=True,
-    output_path='./output',
+    output_path="./output",
     datasets=[dataset_config],
-    cudnn_benchmark=False,
 )
 
 # INITIALIZE THE AUDIO PROCESSOR
